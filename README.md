@@ -1,3 +1,13 @@
+---
+title: CoconutHub API
+emoji: 🥥
+colorFrom: green
+colorTo: yellow
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # CoconutHub (පොල්හබ්) — Sri Lanka's Coconut Trade Platform
 
 An industry-grade B2B marketplace and market intelligence platform for Sri Lanka's coconut and agro-industrial sector.
