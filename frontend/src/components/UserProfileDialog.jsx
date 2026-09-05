@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { toast } from 'sonner';
 import {
   X,
   User,
@@ -74,15 +75,20 @@ export const UserProfileDialog = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (email?.trim() && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email.trim())) {
+      toast.error(language === 'si' ? 'කරුණාකර වලංගු විද්‍යුත් තැපැල් (Email) ලිපිනයක් ඇතුළත් කරන්න' : 'Please provide a valid email address');
+      return;
+    }
     await updateProfile({
       fullName,
       businessName,
-      email,
+      email: email?.trim(),
       district,
       bio,
       businessType
     });
     setSavedSuccess(true);
+    toast.success(language === 'si' ? 'පැතිකඩ යාවත්කාලීන කරන ලදී!' : 'Profile updated successfully!');
     setTimeout(() => {
       setIsEditing(false);
       setSavedSuccess(false);

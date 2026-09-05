@@ -97,24 +97,40 @@ export const AuthProvider = ({ children }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email,
+          email: email?.trim(),
           password,
-          fullName,
-          phoneNumber,
+          fullName: fullName?.trim(),
+          phoneNumber: phoneNumber?.trim(),
           district: district || 'Colombo',
           businessType: businessType || 'Supplier',
-          businessName: businessName || fullName,
-          bio: bio || ''
+          businessName: businessName?.trim() || fullName?.trim(),
+          bio: bio?.trim() || ''
         })
       });
 
-      const data = await response.json();
+      let data = {};
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
+
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Registration failed');
+        const errorMsg = data.message ||
+          (data.errors ? Object.values(data.errors).flat().join(' ') : null) ||
+          'Registration failed. Please check your details.';
+        throw new Error(errorMsg);
       }
 
       if (data.token) {
         localStorage.setItem('coconuthub_token', data.token);
+      }
+      if (data.user) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data.user));
+        } catch (e) {
+          console.warn('Could not store auth user', e);
+        }
       }
       setCurrentUser(data.user);
       setHasEnteredApp(true);
@@ -122,26 +138,8 @@ export const AuthProvider = ({ children }) => {
       setAuthModalOpen(false);
       return { success: true, user: data.user };
     } catch (err) {
-      // Fallback local registration if server unreachable
-      console.warn('API register error, falling back locally:', err.message);
-      const fallbackUser = {
-        id: 'user_' + Date.now(),
-        fullName,
-        businessName: businessName || fullName,
-        businessType: businessType || 'Supplier',
-        email,
-        phoneNumber,
-        district: district || 'Colombo',
-        bio: bio || '',
-        role: 'Trader',
-        isVerified: true,
-        createdAt: new Date().toISOString()
-      };
-      setCurrentUser(fallbackUser);
-      setHasEnteredApp(true);
-      sessionStorage.setItem('coconuthub_has_entered', 'true');
-      setAuthModalOpen(false);
-      return { success: true, user: fallbackUser };
+      console.warn('API register error:', err.message);
+      throw err;
     }
   };
 
@@ -151,16 +149,32 @@ export const AuthProvider = ({ children }) => {
       const response = await fetch(`${API_BASE}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier, password })
+        body: JSON.stringify({ identifier: identifier?.trim(), password })
       });
 
-      const data = await response.json();
+      let data = {};
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
+
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Login failed');
+        const errorMsg = data.message ||
+          (data.errors ? Object.values(data.errors).flat().join(' ') : null) ||
+          'Login failed. Invalid credentials.';
+        throw new Error(errorMsg);
       }
 
       if (data.token) {
         localStorage.setItem('coconuthub_token', data.token);
+      }
+      if (data.user) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data.user));
+        } catch (e) {
+          console.warn('Could not store auth user', e);
+        }
       }
       setCurrentUser(data.user);
       setHasEnteredApp(true);

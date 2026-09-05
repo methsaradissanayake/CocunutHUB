@@ -1,7 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using CoconutHub.Core.DTOs;
 using CoconutHub.Core.Entities;
 using CoconutHub.Core.Enums;
@@ -21,6 +23,10 @@ public class AuthController : ControllerBase
     private readonly ISmsService _smsService;
     private readonly IConfiguration _configuration;
 
+    private static readonly Regex EmailRegex = new(
+        @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
     public AuthController(CoconutHubDbContext context, ISmsService smsService, IConfiguration configuration)
     {
         _context = context;
@@ -28,24 +34,64 @@ public class AuthController : ControllerBase
         _configuration = configuration;
     }
 
+    private static bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return false;
+        var trimmed = email.Trim();
+        if (!EmailRegex.IsMatch(trimmed)) return false;
+        try
+        {
+            var addr = new MailAddress(trimmed);
+            return addr.Address.Equals(trimmed, StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static string NormalizePhoneNumber(string phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone)) return string.Empty;
+        string digits = new(phone.Where(char.IsDigit).ToArray());
+        if (digits.StartsWith("0"))
+        {
+            digits = "94" + digits[1..];
+        }
+        else if (!digits.StartsWith("94") && digits.Length >= 9)
+        {
+            digits = "94" + digits;
+        }
+        return "+" + digits;
+    }
+
     [HttpPost("register")]
     public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Email))
-            return BadRequest(new AuthResponse(false, null, null, "Email address is required"));
+        if (string.IsNullOrWhiteSpace(request.Email) || !IsValidEmail(request.Email))
+            return BadRequest(new AuthResponse(false, null, null, "Please enter a valid email address (e.g. name@example.com)"));
+
         if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 6)
             return BadRequest(new AuthResponse(false, null, null, "Password must be at least 6 characters long"));
+
         if (string.IsNullOrWhiteSpace(request.FullName))
             return BadRequest(new AuthResponse(false, null, null, "Full name is required"));
+
         if (string.IsNullOrWhiteSpace(request.PhoneNumber))
             return BadRequest(new AuthResponse(false, null, null, "Phone number is required"));
 
+        var digitsOnly = new string(request.PhoneNumber.Where(char.IsDigit).ToArray());
+        if (digitsOnly.Length < 9 || digitsOnly.Length > 12)
+            return BadRequest(new AuthResponse(false, null, null, "Please enter a valid phone number (e.g. 07X XXX XXXX)"));
+
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
-        var normalizedPhone = request.PhoneNumber.Trim();
+        var rawPhone = request.PhoneNumber.Trim();
+        var normalizedPhone = NormalizePhoneNumber(rawPhone);
 
         // Check if user already exists
         var existingUser = await _context.Users.FirstOrDefaultAsync(u =>
             (u.Email != null && u.Email.ToLower() == normalizedEmail) ||
+            u.PhoneNumber == rawPhone ||
             u.PhoneNumber == normalizedPhone);
 
         if (existingUser != null)
@@ -85,11 +131,15 @@ public class AuthController : ControllerBase
             return BadRequest(new AuthResponse(false, null, null, "Email/Phone and password are required"));
 
         var identifier = request.Identifier.Trim().ToLowerInvariant();
+        var rawIdentifier = request.Identifier.Trim();
+        var normPhone = NormalizePhoneNumber(rawIdentifier);
+
         var user = await _context.Users.FirstOrDefaultAsync(u =>
             (u.Email != null && (u.Email.ToLower() == identifier ||
                 (identifier == "procurement@colombofoods.lk" && u.Email.ToLower() == "procure@colombofoods.lk") ||
                 (identifier == "procure@colombofoods.lk" && u.Email.ToLower() == "procurement@colombofoods.lk"))) ||
-            u.PhoneNumber == request.Identifier.Trim());
+            u.PhoneNumber == rawIdentifier ||
+            u.PhoneNumber == normPhone);
 
         if (user == null)
             return Unauthorized(new AuthResponse(false, null, null, "Invalid email/phone or password"));
@@ -170,7 +220,11 @@ public class AuthController : ControllerBase
         if (request.Bio != null)
             user.Bio = request.Bio.Trim();
         if (!string.IsNullOrWhiteSpace(request.Email))
+        {
+            if (!IsValidEmail(request.Email))
+                return BadRequest(new AuthResponse(false, null, null, "Please enter a valid email address (e.g. name@example.com)"));
             user.Email = request.Email.Trim().ToLowerInvariant();
+        }
 
         user.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();

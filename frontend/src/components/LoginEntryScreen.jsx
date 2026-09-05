@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { toast } from "sonner";
 import {
   Mail,
   Lock,
@@ -735,24 +736,28 @@ export const LoginEntryScreen = ({ onEnter }) => {
 
   const clearMessages = () => { setError(""); setInfoMsg(""); };
 
+  const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     clearMessages();
-    if (!email.trim() || !password) {
-      setError(language === "si" ? "කරුණාකර විද්‍යුත් තැපෑල සහ මුරපදය ඇතුළත් කරන්න" : "Please enter your Email and Password.");
+    const trimmedId = email.trim();
+    if (!trimmedId || !password) {
+      setError(language === "si" ? "කරුණාකර විද්‍යුත් තැපෑල/දුරකථනය සහ මුරපදය ඇතුළත් කරන්න" : "Please enter your Email/Phone and Password.");
       return;
     }
     try {
       setLoading(true);
-      await login({ identifier: email.trim(), password });
+      await login({ identifier: trimmedId, password });
+      toast.success(language === "si" ? "සාර්ථකව ඇතුල් විය!" : "Signed in successfully!");
       onEnter?.();
     } catch (err) {
       // Demo emails always bypass the real API
       if (
-        email.includes("sunil") ||
-        email.includes("colombo") ||
-        email.includes("wickrama") ||
-        email.includes("demo")
+        trimmedId.includes("sunil") ||
+        trimmedId.includes("colombo") ||
+        trimmedId.includes("wickrama") ||
+        trimmedId.includes("demo")
       ) {
         onEnter?.();
         return;
@@ -772,20 +777,66 @@ export const LoginEntryScreen = ({ onEnter }) => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     clearMessages();
-    if (!email.trim() || !password || !fullName.trim() || !phoneNumber.trim()) {
+
+    const trimmedEmail = email.trim();
+    const trimmedFullName = fullName.trim();
+    const trimmedPhone = phoneNumber.trim();
+
+    if (!trimmedEmail || !password || !trimmedFullName || !trimmedPhone) {
       setError(language === "si" ? "කරුණාකර සියලු අනිවාර්ය තොරතුරු පුරවන්න" : "Please complete all required fields.");
       return;
     }
+
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
+      setError(
+        language === "si"
+          ? "කරුණාකර වලංගු විද්‍යුත් තැපැල් (Email) ලිපිනයක් ඇතුළත් කරන්න (උදා: name@example.com)"
+          : "Please enter a valid email address (e.g. name@example.com)."
+      );
+      return;
+    }
+
+    const digitsOnly = trimmedPhone.replace(/\D/g, "");
+    if (digitsOnly.length < 9 || digitsOnly.length > 12) {
+      setError(
+        language === "si"
+          ? "කරුණාකර වලංගු දුරකථන අංකයක් ඇතුළත් කරන්න (ඉලක්කම් 9-10)"
+          : "Please enter a valid phone number (9-10 digits)."
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      setError(
+        language === "si"
+          ? "මුරපදය අවම වශයෙන් අකුරු 6ක් විය යුතුය"
+          : "Password must be at least 6 characters long."
+      );
+      return;
+    }
+
     try {
       setLoading(true);
-      await register({ email: email.trim(), password, fullName: fullName.trim(), phoneNumber: phoneNumber.trim(), district, businessType });
+      await register({
+        email: trimmedEmail,
+        password,
+        fullName: trimmedFullName,
+        phoneNumber: trimmedPhone,
+        district,
+        businessType
+      });
+      toast.success(
+        language === "si"
+          ? `සාදරයෙන් පිළිගනිමු ${trimmedFullName}! ඔබ සාර්ථකව ලියාපදිංචි වී පිවිස ඇත.`
+          : `Welcome ${trimmedFullName}! Account created and signed in.`
+      );
       onEnter?.();
     } catch (err) {
       const isNetworkError = err instanceof TypeError || err.message === "Failed to fetch" || err.message?.includes("NetworkError");
       setError(
         isNetworkError
           ? (language === "si" ? "සේවාදායකයට සම්බන්ධ වීමට නොහැකි විය." : "Cannot reach the server right now. Please try again later.")
-          : (err.message || (language === "si" ? "ලියාපදිංචි වීම අසාර්ථක විය" : "Registration failed. Please try again."))
+          : (err.message || (language === "si" ? "ලියාපදිංචි වීම අසාර්ථක විය" : "Registration failed. Please check your details."))
       );
     } finally {
       setLoading(false);

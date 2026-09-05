@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { toast } from 'sonner';
+
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 import {
   X,
   User,
@@ -74,37 +77,53 @@ export const AuthModal = () => {
 
     try {
       if (isRegister) {
-        if (!email.trim() || !email.includes('@')) {
-          throw new Error(language === 'si' ? 'වලංගු විද්‍යුත් තැපැල් (Email) ලිපිනයක් ඇතුළත් කරන්න' : 'Please provide a valid email address');
+        const trimmedEmail = email.trim();
+        const trimmedFullName = fullName.trim();
+        const trimmedPhone = phoneNumber.trim();
+
+        if (!trimmedEmail || !EMAIL_REGEX.test(trimmedEmail)) {
+          throw new Error(
+            language === 'si'
+              ? 'කරුණාකර වලංගු විද්‍යුත් තැපැල් (Email) ලිපිනයක් ඇතුළත් කරන්න (උදා: name@example.com)'
+              : 'Please provide a valid email address (e.g. name@example.com)'
+          );
         }
-        if (!fullName.trim()) {
+        if (!trimmedFullName) {
           throw new Error(language === 'si' ? 'සම්පූර්ණ නම ඇතුළත් කරන්න' : 'Please enter your full name');
         }
-        if (!phoneNumber.trim() || phoneNumber.trim().length < 9) {
-          throw new Error(language === 'si' ? 'වලංගු දුරකථන අංකයක් ඇතුළත් කරන්න' : 'Please enter a valid phone number');
+        const digitsOnly = trimmedPhone.replace(/\D/g, '');
+        if (digitsOnly.length < 9 || digitsOnly.length > 12) {
+          throw new Error(language === 'si' ? 'වලංගු දුරකථන අංකයක් ඇතුළත් කරන්න (ඉලක්කම් 9-10)' : 'Please enter a valid phone number (9-10 digits)');
         }
         if (password.length < 6) {
           throw new Error(language === 'si' ? 'මුරපදය අවම වශයෙන් අකුරු 6ක් විය යුතුය' : 'Password must be at least 6 characters');
         }
 
         await register({
-          email: email.trim(),
+          email: trimmedEmail,
           password,
-          fullName: fullName.trim(),
-          businessName: businessName.trim() || fullName.trim(),
-          phoneNumber: phoneNumber.trim(),
+          fullName: trimmedFullName,
+          businessName: businessName.trim() || trimmedFullName,
+          phoneNumber: trimmedPhone,
           district,
           businessType,
           bio: bio.trim()
         });
 
-        setSuccessMsg(language === 'si' ? 'ගිණුම සාර්ථකව සාදන ලදී!' : 'Account successfully created!');
+        toast.success(
+          language === 'si'
+            ? `ගිණුම සාර්ථකව සාදන ලදී! සාදරයෙන් පිළිගනිමු ${trimmedFullName}!`
+            : `Account successfully created! Welcome ${trimmedFullName}.`
+        );
+        setAuthModalOpen(false);
       } else {
-        if (!email.trim() || !password) {
+        const trimmedId = email.trim();
+        if (!trimmedId || !password) {
           throw new Error(language === 'si' ? 'විද්‍යුත් තැපෑල/දුරකථනය සහ මුරපදය අවශ්‍ය වේ' : 'Email/Phone and password are required');
         }
-        await login({ identifier: email.trim(), password });
-        setSuccessMsg(language === 'si' ? 'සාර්ථකව ඇතුල් විය!' : 'Successfully signed in!');
+        await login({ identifier: trimmedId, password });
+        toast.success(language === 'si' ? 'සාර්ථකව ඇතුල් විය!' : 'Successfully signed in!');
+        setAuthModalOpen(false);
       }
     } catch (err) {
       setError(err.message || 'An error occurred. Please try again.');
