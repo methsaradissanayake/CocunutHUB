@@ -35,8 +35,12 @@ COPY --from=api-build /app/publish .
 # Copy Vite SPA assets into wwwroot for unified all-in-one serving
 COPY --from=client-build /app/frontend/dist ./wwwroot
 
-# Default port for Render / Fly.io / Railway / Container hosts
-ENV ASPNETCORE_URLS=http://+:8080
-EXPOSE 8080
+# Ensure directory is writable for SQLite database in Hugging Face / container environments
+RUN chmod -R 777 /app
+
+# Port 7860 is the standard port for Hugging Face Spaces & cloud containers
+ENV ASPNETCORE_URLS=http://+:7860
+ENV PORT=7860
+EXPOSE 7860
 
 ENTRYPOINT ["dotnet", "CoconutHub.Api.dll"]
