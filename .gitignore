@@ -9,6 +9,8 @@ dist/
 build/
 bin/
 obj/
+publish_api/
+*.zip
 
 # Environment files
 .env
