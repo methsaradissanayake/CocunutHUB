@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: coconuthub-db
+    restart: always
+    environment:
+      POSTGRES_DB: coconuthub_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. ASP.NET Core Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: src/CoconutHub.Api/Dockerfile
+    container_name: coconuthub-api
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__PostgreSql=Host=postgres;Port=5432;Database=coconuthub_db;Username=postgres;Password=postgrespassword2026
+      - UseSqliteFallback=false
+      - PayHere__MerchantId=${PAYHERE_MERCHANT_ID:-1220000}
+      - PayHere__MerchantSecret=${PAYHERE_MERCHANT_SECRET:-4MzEyMzQ1Njc4OTAxMjM0NQ==}
+      - PayHere__Sandbox=true
+      - PayHere__DemoMode=false
+    ports:
+      - "5000:8080"
+    depends_on:
+      - postgres
+
+  # 3. React Frontend (Vite + Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: coconuthub-web
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

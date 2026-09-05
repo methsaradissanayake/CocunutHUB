@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CoconutHub.Api/CoconutHub.Api.csproj" />
+    <Project Path="src/CoconutHub.Core/CoconutHub.Core.csproj" />
+    <Project Path="src/CoconutHub.Infrastructure/CoconutHub.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CoconutHub.UnitTests/CoconutHub.UnitTests.csproj" />
+  </Folder>
+</Solution>

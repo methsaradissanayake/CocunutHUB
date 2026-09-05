@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: coconuthub-fullstack
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: UseSqliteFallback
+        value: "true"

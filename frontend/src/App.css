@@ -1,0 +1,237 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap');
+
+/* CoconutHub Design System */
+:root {
+  --ch-teal: #004236;
+  --ch-teal-dark: #002D24;
+  --ch-teal-deep: #072B23;
+  --ch-teal-hover: #00362c;
+  --ch-yellow: #FFCE00;
+  --ch-yellow-hover: #E5B800;
+  --ch-sage: #E8F1EC;
+  --ch-sage-light: #F2F7F4;
+  --ch-cream: #F9FAF8;
+  --ch-text-primary: #004236;
+  --ch-text-body: #1E293B;
+  --ch-border: #E2E8F0;
+
+  /* Aliases for compatibility */
+  --ra-teal: var(--ch-teal);
+  --ra-teal-dark: var(--ch-teal-dark);
+  --ra-teal-deep: var(--ch-teal-deep);
+  --ra-teal-hover: var(--ch-teal-hover);
+  --ra-yellow: var(--ch-yellow);
+  --ra-yellow-hover: var(--ch-yellow-hover);
+  --ra-sage: var(--ch-sage);
+  --ra-sage-light: var(--ch-sage-light);
+  --ra-cream: var(--ch-cream);
+  --ra-text-primary: var(--ch-text-primary);
+  --ra-text-body: var(--ch-text-body);
+  --ra-border: var(--ch-border);
+}
+
+body {
+  background-color: #F9FAF8;
+  color: #1E293B;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.App {
+  min-height: 100vh;
+  background: #F9FAF8;
+  color: #1E293B;
+}
+
+.ch-title,
+.ra-title {
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  color: #004236;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.ch-badge,
+.ra-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  border: 1.5px solid #004236;
+  color: #004236;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: 4px;
+  background: transparent;
+}
+
+.ch-btn-yellow,
+.ra-btn-yellow {
+  background-color: #FFCE00;
+  color: #004236;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ch-btn-yellow:hover,
+.ra-btn-yellow:hover {
+  background-color: #E5B800;
+  transform: translateY(-1px);
+}
+
+.ch-btn-teal,
+.ra-btn-teal {
+  background-color: #004236;
+  color: #FFFFFF;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ch-btn-teal:hover,
+.ra-btn-teal:hover {
+  background-color: #002D24;
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   BEHANCE SPLIT-CARD LOGIN STANDARD CSS
+   ========================================================= */
+
+.behance-input:-webkit-autofill,
+.behance-input:-webkit-autofill:hover, 
+.behance-input:-webkit-autofill:focus,
+.behance-input:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+  box-shadow: 0 0 0px 1000px transparent inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  background-color: transparent !important;
+}
+
+.behance-login-title {
+  color: #E2FDF2;
+  text-shadow: 0 0 16px rgba(210, 250, 236, 0.75), 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.behance-btn-glow {
+  background: linear-gradient(180deg, #A8E8DC 0%, #80CFBE 100%);
+  color: #053C2F;
+  box-shadow: 0 8px 22px rgba(128, 207, 190, 0.45);
+}
+
+.behance-btn-glow:hover {
+  background: linear-gradient(180deg, #B8F2E6 0%, #8EDECB 100%);
+  box-shadow: 0 10px 26px rgba(128, 207, 190, 0.6);
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   TEAL GLASSMORPHIC LOGIN (MATCHING UPLOADED SCREENSHOT)
+   ========================================================= */
+
+.teal-login-bg {
+  background: radial-gradient(circle at 50% 40%, #72BCBA 0%, #4D9496 45%, #357477 80%, #296063 100%);
+}
+
+.teal-glass-card {
+  background: linear-gradient(180deg, rgba(22, 90, 97, 0.72) 0%, rgba(13, 62, 70, 0.88) 100%);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 25px 50px -10px rgba(0, 20, 25, 0.45), 0 10px 20px -5px rgba(0, 0, 0, 0.25);
+  border-radius: 16px;
+}
+
+.teal-avatar-circle {
+  background: #001E3D;
+  box-shadow: 0 12px 28px rgba(0, 15, 30, 0.45);
+}
+
+.teal-login-input:-webkit-autofill,
+.teal-login-input:-webkit-autofill:hover, 
+.teal-login-input:-webkit-autofill:focus,
+.teal-login-input:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+  box-shadow: 0 0 0px 1000px transparent inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  background-color: transparent !important;
+}
+
+.teal-login-btn {
+  background-color: #001E3D;
+  color: #FFFFFF;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+  border-radius: 3px;
+  box-shadow: 0 6px 16px rgba(0, 20, 40, 0.35);
+  transition: all 0.2s ease-in-out;
+}
+
+.teal-login-btn:hover {
+  background-color: #00152B;
+  box-shadow: 0 8px 20px rgba(0, 20, 40, 0.5);
+  transform: translateY(-1px);
+}
+
+.teal-login-container {
+  width: 30% !important;
+  min-width: 320px !important;
+  max-width: 440px !important;
+  margin: 0 auto !important;
+}
+
+@media (max-width: 768px) {
+  .teal-login-container {
+    width: 88% !important;
+    min-width: 280px !important;
+  }
+}
+
+/* ── CoconutHub UI Robust Docking ── */
+.ch-bottom-dock {
+  position: fixed !important;
+  bottom: 16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 40 !important;
+  width: auto !important;
+  max-width: calc(100vw - 24px) !important;
+}
+
+.ch-chat-dock {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  z-index: 45 !important;
+}
+
+.ch-chat-window {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  z-index: 50 !important;
+}
+
+@media (max-width: 640px) {
+  .ch-chat-dock {
+    bottom: 76px !important;
+    right: 16px !important;
+  }
+  .ch-chat-window {
+    bottom: 12px !important;
+    right: 12px !important;
+    left: 12px !important;
+    width: auto !important;
+  }
+}
+
+
+
+
