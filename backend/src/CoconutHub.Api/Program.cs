@@ -7,6 +7,13 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Bind to dynamic host port if provided by platform (Koyeb, HuggingFace, Render, etc.)
+var portEnv = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(portEnv))
+{
+    builder.WebHost.UseUrls($"http://+:{portEnv}");
+}
+
 // 1. Database Configuration with Cloud Auto-Detection
 // Checks DATABASE_URL (Supabase / Neon / Render / Railway) or Postgres connection string, falls back to SQLite
 string? databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
